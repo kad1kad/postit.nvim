@@ -1,4 +1,5 @@
 -- postit.nvim - Simple post-it note plugin
+-- File: lua/postit/init.lua
 
 local M = {}
 
@@ -147,10 +148,10 @@ local function toggle_note(note_num)
 
 	-- Set window-local keymaps
 	local opts = { buffer = buf, silent = true }
-	vim.keymap.set("n", "<leader>pf", function()
+	vim.keymap.set("n", "<leader>nf", function()
 		M.toggle_fullscreen(note_num)
 	end, opts)
-	vim.keymap.set("n", "<leader>px", function()
+	vim.keymap.set("n", "<leader>nx", function()
 		M.clear_note(note_num)
 	end, opts)
 	vim.keymap.set("n", "<Esc>", function()
@@ -197,13 +198,13 @@ function M.setup(user_config)
 
 	-- Create keymaps
 	for i = 1, 9 do
-		vim.keymap.set("n", "<leader>pt" .. i, function()
+		vim.keymap.set("n", "<leader>n" .. i, function()
 			toggle_note(i)
 		end, { silent = true, desc = "Toggle post-it note " .. i })
 	end
 
 	-- Default toggle (note 1)
-	vim.keymap.set("n", "<leader>pt", function()
+	vim.keymap.set("n", "<leader>n", function()
 		toggle_note(1)
 	end, { silent = true, desc = "Toggle post-it note 1" })
 end
