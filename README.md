@@ -45,14 +45,6 @@ A simple, minimal Neovim post-it plugin for non-sophisticated note takers.
 use "kad1kad/postit.nvim"
 ```
 
-### Using vim-plug or other managers
-
-Add the plugin and it will work automatically:
-
-```vim
-Plug 'kad1kad/postit.nvim'
-```
-
 ## Usage
 
 ### Default Keymaps
