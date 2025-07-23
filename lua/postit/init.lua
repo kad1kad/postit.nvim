@@ -1,6 +1,3 @@
--- Navigate to file under cursor-- postit.nvim - Simple post-it note plugin
--- File: lua/postit/init.lua
-
 local M = {}
 
 -- Plugin state
@@ -35,7 +32,6 @@ local function get_timestamp()
 	return os.date("%d/%m/%y %H:%M")
 end
 
--- Load note content from file
 local function load_note_content()
 	local file_path = get_note_path()
 	local file = io.open(file_path, "r")
@@ -47,7 +43,6 @@ local function load_note_content()
 	return { "Post-it Note - " .. get_timestamp(), "" }
 end
 
--- Save note content to file
 local function save_note_content()
 	local buf = state.buffer
 	if not buf or not vim.api.nvim_buf_is_valid(buf) then
@@ -66,54 +61,6 @@ local function save_note_content()
 	end
 end
 
--- Insert current file path into note
-local function insert_current_file_path()
-	-- First, check if we're already in the post-it buffer
-	local buf_name = vim.api.nvim_buf_get_name(0)
-	if buf_name:match("Post%-it") then
-		print("Cannot insert file path from within post-it buffer")
-		return
-	end
-
-	-- Capture the file path from the current buffer
-	local current_file = vim.fn.expand("%:.") -- Get relative path from current buffer
-
-	-- Check if we have a valid file
-	if not current_file or current_file == "" then
-		print("No file in current buffer")
-		return
-	end
-
-	-- If post-it is not open, open it first
-	if not state.window or not vim.api.nvim_win_is_valid(state.window) then
-		toggle_note()
-	else
-		-- Switch to post-it window
-		vim.api.nvim_set_current_win(state.window)
-	end
-
-	-- Insert the file path at cursor position
-	local buf = state.buffer
-	local win = state.window
-
-	if buf and vim.api.nvim_buf_is_valid(buf) and win and vim.api.nvim_win_is_valid(win) then
-		local cursor = vim.api.nvim_win_get_cursor(win)
-		local line_num = cursor[1] - 1
-		local col_num = cursor[2]
-
-		-- Get current line
-		local line = vim.api.nvim_buf_get_lines(buf, line_num, line_num + 1, false)[1] or ""
-
-		-- Insert file path at cursor position
-		local new_line = line:sub(1, col_num) .. current_file .. line:sub(col_num + 1)
-		vim.api.nvim_buf_set_lines(buf, line_num, line_num + 1, false, { new_line })
-
-		-- Move cursor to end of inserted text
-		vim.api.nvim_win_set_cursor(win, { line_num + 1, col_num + #current_file })
-
-		print("Inserted: " .. current_file)
-	end
-end
 local function navigate_to_file()
 	local buf = state.buffer
 	if not buf or not vim.api.nvim_buf_is_valid(buf) then
@@ -269,11 +216,9 @@ local function toggle_note()
 		M.toggle_note()
 	end, opts)
 
-	-- Start cursor on line 2 (after the header)
-	vim.api.nvim_win_set_cursor(win, { 2, 0 })
+	vim.api.nvim_win_set_cursor(win, { 3, 0 })
 end
 
--- Toggle fullscreen mode
 local function toggle_fullscreen()
 	if not state.window or not vim.api.nvim_win_is_valid(state.window) then
 		return
@@ -284,7 +229,6 @@ local function toggle_fullscreen()
 	vim.api.nvim_win_set_config(state.window, win_config)
 end
 
--- Clear note content
 local function clear_note()
 	local buf = state.buffer
 	if not buf or not vim.api.nvim_buf_is_valid(buf) then
@@ -301,17 +245,14 @@ local function clear_note()
 	end
 end
 
--- Public API
 M.toggle_note = toggle_note
 M.toggle_fullscreen = toggle_fullscreen
 M.clear_note = clear_note
 M.navigate_to_file = navigate_to_file
 
--- Setup function
 function M.setup(user_config)
 	user_config = user_config or {}
 
-	-- Only setup once
 	if M._setup_done then
 		-- If called again, just update config
 		config = vim.tbl_deep_extend("force", config, user_config)
@@ -320,7 +261,6 @@ function M.setup(user_config)
 
 	config = vim.tbl_deep_extend("force", config, user_config)
 
-	-- Create main keymap
 	vim.keymap.set("n", "<leader>nt", function()
 		toggle_note()
 	end, { silent = true, desc = "Toggle post-it note" })
