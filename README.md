@@ -1,4 +1,4 @@
-### File Navigation### Multiple Notes# postit.nvim
+# postit.nvim
 
 A simple, minimal Neovim post-it plugin for non-sophisticated note takers.
 
