@@ -68,10 +68,18 @@ end
 
 -- Insert current file path into note
 local function insert_current_file_path()
-	-- Get current buffer file path before opening post-it
-	local current_file = vim.fn.expand("%:.") -- Relative path from cwd
+	-- First, check if we're already in the post-it buffer
+	local buf_name = vim.api.nvim_buf_get_name(0)
+	if buf_name:match("Post%-it") then
+		print("Cannot insert file path from within post-it buffer")
+		return
+	end
 
-	if current_file == "" then
+	-- Capture the file path from the current buffer
+	local current_file = vim.fn.expand("%:.") -- Get relative path from current buffer
+
+	-- Check if we have a valid file
+	if not current_file or current_file == "" then
 		print("No file in current buffer")
 		return
 	end
@@ -79,6 +87,9 @@ local function insert_current_file_path()
 	-- If post-it is not open, open it first
 	if not state.window or not vim.api.nvim_win_is_valid(state.window) then
 		toggle_note()
+	else
+		-- Switch to post-it window
+		vim.api.nvim_set_current_win(state.window)
 	end
 
 	-- Insert the file path at cursor position
@@ -169,10 +180,9 @@ local function get_or_create_buffer()
 	state.buffer = buf
 
 	-- Set buffer options
-	vim.api.nvim_buf_set_option(buf, "buftype", "nowrite")
+	vim.api.nvim_buf_set_option(buf, "buftype", "nofile")
 	vim.api.nvim_buf_set_option(buf, "swapfile", false)
 	vim.api.nvim_buf_set_option(buf, "bufhidden", "hide")
-	vim.api.nvim_buf_set_option(buf, "modified", false)
 	vim.api.nvim_buf_set_name(buf, "Post-it Note")
 
 	-- Load content
@@ -184,7 +194,6 @@ local function get_or_create_buffer()
 		buffer = buf,
 		callback = function()
 			save_note_content()
-			vim.api.nvim_buf_set_option(buf, "modified", false)
 		end,
 	})
 
@@ -256,6 +265,12 @@ local function toggle_note()
 	vim.keymap.set("n", "<Esc>", function()
 		M.toggle_note()
 	end, opts)
+	vim.keymap.set("n", "q", function()
+		M.toggle_note()
+	end, opts)
+
+	-- Start cursor on line 2 (after the header)
+	vim.api.nvim_win_set_cursor(win, { 2, 0 })
 end
 
 -- Toggle fullscreen mode
@@ -291,7 +306,6 @@ M.toggle_note = toggle_note
 M.toggle_fullscreen = toggle_fullscreen
 M.clear_note = clear_note
 M.navigate_to_file = navigate_to_file
-M.insert_current_file_path = insert_current_file_path
 
 -- Setup function
 function M.setup(user_config)
@@ -310,11 +324,6 @@ function M.setup(user_config)
 	vim.keymap.set("n", "<leader>nt", function()
 		toggle_note()
 	end, { silent = true, desc = "Toggle post-it note" })
-
-	-- Global keymap to insert current file path
-	vim.keymap.set("n", "<leader>np", function()
-		insert_current_file_path()
-	end, { silent = true, desc = "Insert current file path into post-it note" })
 
 	M._setup_done = true
 end
