@@ -216,7 +216,8 @@ local function toggle_note()
 		M.toggle_note()
 	end, opts)
 
-	vim.api.nvim_win_set_cursor(win, { 3, 0 })
+	-- Start cursor on line 2 (after the header)
+	vim.api.nvim_win_set_cursor(win, { 2, 0 })
 end
 
 local function toggle_fullscreen()
